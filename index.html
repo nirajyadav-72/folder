@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TG Mini App</title>
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --primary-color: #2481cc;
+            --secondary-color: #1a5fa0;
+            --text-color: #000000;
+            --bg-color: #ffffff;
+            --card-bg: #f1f0f0;
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            padding-bottom: 95px;
+            margin: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme Specific Styles */
+        body.light-theme {
+            --primary-color: #2481cc;
+            --secondary-color: #1a5fa0;
+            --text-color: #000000;
+            --bg-color: #ffffff;
+            --card-bg: #f1f0f0;
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+
+        body.dark-theme {
+            --primary-color: #4fa3ff;
+            --secondary-color: #3a8de6;
+            --text-color: #e0e0e0;
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --shadow-color: rgba(255,255,255,0.1);
+        }
+
+        body.green-theme {
+            --primary-color: #10b981;
+            --secondary-color: #059669;
+            --text-color: #000000;
+            --bg-color: #f0fdf4;
+            --card-bg: #ecfdf5;
+            --shadow-color: rgba(16,185,129,0.2);
+        }
+
+        body.purple-theme {
+            --primary-color: #8b5cf6;
+            --secondary-color: #7c3aed;
+            --text-color: #1f1f1f;
+            --bg-color: #faf5ff;
+            --card-bg: #f3e8ff;
+            --shadow-color: rgba(139,92,246,0.2);
+        }
+
+        body.ocean-theme {
+            --primary-color: #0284c7;
+            --secondary-color: #0369a1;
+            --text-color: #0c1428;
+            --bg-color: #f0f9ff;
+            --card-bg: #e0f2fe;
+            --shadow-color: rgba(2,132,199,0.2);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            color: var(--text-color);
+        }
+
+        h3 { 
+            margin-top: 0; 
+            color: var(--primary-color); 
+        }
+
+        p { 
+            margin: 5px 0; 
+            font-size: 14px; 
+            color: var(--text-color);
+        }
+
+        .bold { 
+            font-weight: bold; 
+        }
+
+        /* Profile Photo Design */
+        .avatar-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            object-fit: cover;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            margin: 0 auto;
+        }
+
+        /* Chat Box - Uniform Size */
+        .chat-box {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px var(--shadow-color);
+            padding: 15px;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+
+        /* Message Row */
+        .chat-message-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        /* Profile Picture */
+        .chat-dp {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid #e0e0e0;
+        }
+
+        /* Message Content Wrapper */
+        .message-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: calc(100% - 57px);
+            width: 100%;
+        }
+
+        /* User Name */
+        .user-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        /* Message Bubble */
+        .message-bubble {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 10px 12px;
+            border-radius: 0px 12px 12px 12px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        /* Message Time */
+        .message-time {
+            font-size: 11px;
+            color: #999999;
+            margin-top: 4px;
+            align-self: flex-end;
+        }
+
+        /* Button Container */
+        .button-container {
+            text-align: center;
+            width: 100%;
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Help Button / My Button */
+        .help-button,
+        .my-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 6px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .help-button:hover,
+        .my-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Compact Profile Card */
+        #user-card {
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            margin-bottom: 15px;
+        }
+
+        .profile-tap-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px var(--shadow-color);
+            overflow: hidden;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-tap-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .profile-tap-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .profile-tap-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .profile-tap-info {
+            flex: 1;
+            color: white;
+        }
+
+        .profile-tap-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .profile-tap-hint {
+            font-size: 12px;
+            opacity: 0.9;
+            margin: 4px 0 0 0;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .status-online {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .status-away {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .status-offline {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        /* Active Time Box */
+        .active-time-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .active-time-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .active-time-value {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        /* Profile Details Modal */
+        .profile-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .profile-modal-overlay.show {
+            display: flex;
+        }
+
+        .profile-modal {
+            background: var(--bg-color);
+            border-radius: 12px;
+            padding: 0;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .profile-modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .profile-modal-header h3 {
+            margin: 0;
+            color: white;
+            font-size: 16px;
+        }
+
+        .profile-modal-content {
+            padding: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .profile-modal-avatar-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-modal-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            object-fit: cover;
+            position: relative;
+        }
+
+        /* Status Indicator on Avatar */
+        .status-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+            bottom: 0;
+            right: 0;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-indicator.online {
+            background-color: #10b981;
+        }
+
+        .status-indicator.away {
+            background-color: #f59e0b;
+        }
+
+        .status-indicator.offline {
+            background-color: #6b7280;
+        }
+
+        .profile-modal-content p {
+            margin: 12px 0;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .profile-info-section {
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        .profile-info-label {
+            font-size: 12px;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .profile-info-value {
+            font-size: 14px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .profile-modal-footer {
+            padding: 15px;
+            background: var(--card-bg);
+            text-align: center;
+            border-top: 1px solid var(--shadow-color);
+        }
+
+        .profile-modal-close {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .profile-modal-close:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* User Details Card with 2-color design */
+        .user-details-box {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px var(--shadow-color);
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .user-details-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .user-details-header h3 {
+            margin: 0;
+            color: white;
+            font-size: 16px;
+        }
+
+        .user-details-content {
+            padding: 15px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .user-details-content .avatar-container {
+            margin-bottom: 15px;
+        }
+
+        .user-details-content p {
+            margin: 8px 0;
+            font-size: 13px;
+            color: var(--text-color);
+        }
+
+        /* Theme Selector Modal */
+        .theme-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .theme-modal {
+            background: var(--bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .theme-modal h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .theme-option {
+            padding: 15px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-option.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Theme Option Colors */
+        .light-option {
+            background: linear-gradient(135deg, #2481cc 0%, #1a5fa0 100%);
+        }
+
+        .dark-option {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid #666;
+        }
+
+        .green-option {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .purple-option {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .ocean-option {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        }
+
+        .modal-button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .close-button {
+            background-color: #e0e0e0;
+            color: #000;
+        }
+
+        .close-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Theme Toggle Button (Floating) */
+        .theme-toggle-btn {
+            position: fixed;
+            bottom: 150px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* बटन कंटेनर को नीचे फिक्स करने के लिए */
+        .custom-bottom-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px 6px; 
+            box-sizing: border-box;
+            background-color: #17212b;
+            z-index: 9999;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px; 
+        }
+
+        /* बटनों का बेसिक डिज़ाइन */
+        .custom-bottom-btn {
+            flex: 1 1 calc(33.33% - 4px);
+            padding: 10px 4px; 
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px; 
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap; 
+            text-align: center;
+            transition: background 0.2s ease;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 1. चैनल बटन: नीला (Blue) */
+        .channel-btn { background-color: #2481cc; }
+        .channel-btn:active { background-color: #1a659e; }
+
+        /* 2. ग्रुप बटन: गहरा हरा (Dark Green) */
+        .group-btn { background-color: #2ea64f; }
+        .group-btn:active { background-color: #217838; }
+
+        /* 3. हेल्प बटन: बैंगनी (Purple) */
+        .third-btn { background-color: #6c5ce7; }
+        .third-btn:active { background-color: #5b4cc4; }
+    </style>
+</head>
+<body class="light-theme">
+    <h2>Welcome dear 👀</h2>
+    
+    <!-- Theme Selector Button -->
+    <button class="theme-toggle-btn" onclick="openThemeModal()" title="Change Theme">🎨</button>
+
+    <!-- Theme Modal -->
+    <div class="theme-modal-overlay" id="themeModalOverlay">
+        <div class="theme-modal">
+            <h2>Choose Your Theme 🎨</h2>
+            <div class="theme-options">
+                <div class="theme-option light-option active" onclick="setTheme('light-theme', this)" data-theme="light-theme">
+                    Light Blue
+                </div>
+                <div class="theme-option dark-option" onclick="setTheme('dark-theme', this)" data-theme="dark-theme">
+                    Dark Mode
+                </div>
+                <div class="theme-option green-option" onclick="setTheme('green-theme', this)" data-theme="green-theme">
+                    Green
+                </div>
+                
+               <div class="theme-option purple-option" onclick="setTheme('purple-theme', this)" data-theme="purple-theme">
+                    Purple
+                </div>
+                <div class="theme-option ocean-option" onclick="setTheme('ocean-theme', this)" data-theme="ocean-theme">
+                    Ocean
+                </div>
+            </div>
+            <div class="modal-button-group">
+                <button class="modal-button close-button" onclick="closeThemeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feature 1: User Details - Compact Tap Card -->
+    <div id="user-card">
+        <div class="profile-tap-card" onclick="openProfileModal()">
+            <div class="profile-tap-content">
+                <img id="profile-tap-avatar" class="profile-tap-avatar" src="https://cloudflare.com" alt="User DP">
+                <div class="profile-tap-info">
+                    <p class="profile-tap-name" id="profile-tap-name">Loading...</p>
+                    <p class="profile-tap-hint">💻 Tap to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dropdown Arrow Icon -->
+    <div class="profile-capsule-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+</div>
+    <h4>🎧 Looking For A Music Bot? ✨Fast • Smooth • 24/7 Active, Play 🔍 Your Favorite Songs Instantly, Enjoy Music Without Hassle 🎶 Try It Once, You'll Love It 💞</h4>
+    
+
+    <!-- Profile Details Modal -->
+    <div class="profile-modal-overlay" id="profileModalOverlay">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3>💞Your Profile💞</h3>
+            </div>
+            <div class="profile-modal-content">
+                <div class="profile-modal-avatar-container">
+                    <img id="profile-modal-avatar" class="profile-modal-avatar" src="https://cloudflare.com" alt="User DP">
+                    <div class="status-indicator online" id="profile-status-indicator" title="User Status">●</div>
+                </div>
+
+                <!-- User Basic Information -->
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">Name</span>
+                        <div class="profile-info-value" id="profile-modal-name">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">Username</span>
+                        <div class="profile-info-value" id="profile-modal-username">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">User ID</span>
+                        <div class="profile-info-value" id="profile-modal-id">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">Language</span>
+                        <div class="profile-info-value" id="profile-modal-lang">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- User Status Section -->
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">📱Current Status</span>
+                        <div class="profile-info-value" id="profile-modal-status">Online</div>
+                    </div>
+                </div>
+
+                <!-- Last Active Time -->
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">⏰ Last Active</span>
+                        <div class="profile-info-value" id="profile-modal-last-active">Just now</div>
+                    </div>
+                </div>
+
+                <!-- Active Time Duration -->
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">⌛ Active Duration Today</span>
+                        <div class="profile-info-value" id="profile-modal-active-time">Calculating...</div>
+                    </div>
+                </div>
+
+                <!-- Join Date -->
+                <div class="profile-info-section">
+                    <div>
+                        <span class="profile-info-label">🗓️ Member Since</span>
+                        <div class="profile-info-value" id="profile-modal-join-date">Today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-modal-footer">
+                <button class="profile-modal-close" onclick="closeProfileModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <h2>🤖 Music Bot Collective</h2>
+<!-- Active Bots Card -->
+    <div class="card" id="active-card">
+        <h3>Total Bots 10</h3>
+        <p><span class="bold">Active Bot</span> 03</p>
+    </div>
+<!-- Chat Box 1: Laado Music -->
+    <div class="card" id="online-card">
+        <div class="chat-box">
+            <div class="chat-message-row">
+                <img src="laado-music.png" alt="User Avatar" class="chat-dp">
+                <div class="message-content-wrapper">
+                    <div class="user-name">𝐋𝗮𝗮𝗱𝗼 💓 𝐌𝘂𝘀𝗶𝗰 [𝐍𝗼 ♡゙ 𝐀𝗱𝘀]</div>
+                    <div class="message-bubble">Username: @laado_musicbot</div>
+                    <div class="message-time">🟢 Online</div>
+                    <div class="button-container">
+                        <a href="https://t.me/laado_musicbot?start=_tgr_BUcJTIM0NDU9" class="help-button">ᴏᴘᴇɴ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ</a>
+                        <a href="https://t.me/laado_musicbot?startgroup=true" class="help-button">ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Chat Box 2: PlayerPro Music -->
+    <div class="card" id="open-card">
+        <div class="chat-box">
+            <div class="chat-message-row">
+                <img src="playerpro-music.png" alt="User Avatar" class="chat-dp">
+                <div class="message-content-wrapper">
+                    <div class="user-name">𝗣𝐥𝐚𝐲𝐞𝐫𝐩𝐫𝐨 ꭙ 𝗠𝐮𝐬𝐢𝐜 ♪ [𝗡𝐨 ♡゙ 𝗔𝐝𝐬]</div>
+                    <div class="message-bubble">Username: @PlayerPro_MusicBot</div>
+                    <div class="message-time">🟢 Online</div>
+                    <div class="button-container">
+                        <a href="https://t.me/PlayerPro_MusicBot?start=_tgr_C62RiaZlNTVl" class="help-button">ᴏᴘᴇɴ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ</a>
+                        <a href="https://t.me/PlayerPro_MusicBot?startgroup=true" class="help-button">ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Chat Box 3: Kuku Music -->
+    <div class="card" id="one-card">
+        <div class="chat-box">
+            <div class="chat-message-row">
+                <img src="kuku-music.png" alt="User Avatar" class="chat-dp">
+                <div class="message-content-wrapper">
+                    <div class="user-name">˹ᴋᴜᴋᴜ ꭙ ᴍᴜꜱɪᴄ˼ ♪</div>
+                    <div class="message-bubble">Username: @Kuku_MusicBot</div>
+                    <div class="message-time">🟢 Online</div>
+                    <div class="button-container">
+                        <a href="https://t.me/Kuku_MusicBot?start=_tgr_6kQXhMQ1MzQ9" class="help-button">ᴏᴘᴇɴ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ</a>
+                        <a href="https://t.me/Kuku_MusicBot?startgroup=true" class="help-button">ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Chat Box 4: Radha Music -->
+    <div class="card" id="radha-card">
+        <div class="chat-box">
+            <div class="chat-message-row">
+                <img src="radha-music.png" alt="User Avatar" class="chat-dp">
+                <div class="message-content-wrapper">
+                    <div class="user-name">˹ʀᴧᴅʜᴧ ꭙ ᴍᴜꜱɪᴄ˼ ♪ [ ɴᴏ ♡゙ ᴧᴅꜱ ]</div>
+                    <div class="message-bubble">Username: @radha_MusicBot</div>
+                    <div class="message-time">🔵 Offline</div>
+                    <div class="button-container">
+                        <a href="https://t.me/radha_streamingbot?start=_tgr_8cHWgZUxYzg1" class="help-button">ᴏᴘᴇɴ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ</a>
+                        <a href="https://t.me/radha_streamingbot?startgroup=true" class="help-button">ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ <!-- Feature 3: App developer Details -->
+    <div class="card" id="developer-card">
+        <h3>Developer & Support</h3>
+    </div>
+     <!-- Chat Box 4: Owner details-->
+    <div class="card" id="owner-card">
+        <div class="chat-box">
+            <div class="chat-message-row">
+                <img src="my-dp.png" alt="User Avatar" class="chat-dp">
+                <div class="message-content-wrapper">
+                    <div class="user-name">Niraj Kumar</div>
+                    <div class="message-bubble">Username: @Comeback_009</div>
+                    <div class="message-time">ID: 7771481658</div>
+                    <div class="button-container">
+                        <a href="https://t.me/Comeback_009" class="my-button">Any query DM 💬</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+        // Track user session start time
+        const userSessionStartTime = new Date();
+        let lastActivityTime = new Date();
+
+        // Update activity time on user interaction
+        document.addEventListener('click', () => {
+            lastActivityTime = new Date();
+        });
+
+        document.addEventListener('touchstart', () => {
+            lastActivityTime = new Date();
+        });
+
+        // Calculate active duration
+        function getActiveDuration() {
+            const now = new Date();
+            const diffMs = now - userSessionStartTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffDays > 0) {
+                return `${diffDays}d ${diffHours % 24}h`;
+            } else if (diffHours > 0) {
+                return `${diffHours}h ${diffMins % 60}m`;
+            } else {
+                return `${diffMins}m`;
+            }
+        }
+
+        // Get formatted last active time
+        function getLastActiveTime() {
+            const now = new Date();
+            const diffMs = now - lastActivityTime;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+
+            if (diffSecs < 60) {
+                return 'Just now';
+            } else if (diffMins < 60) {
+                return `${diffMins}m ago`;
+            } else if (diffHours < 24) {
+                return `${diffHours}h ago`;
+            } else {
+                return lastActivityTime.toLocaleDateString();
+            }
+        }
+
+        // Get user status based on activity
+        function getUserStatus() {
+            const diffMins = Math.floor((new Date() - lastActivityTime) / 60000);
+            if (diffMins < 5) return 'online';
+            if (diffMins < 30) return 'away';
+            return 'offline';
+        }
+
+        // Get status display text
+        function getStatusText() {
+            const status = getUserStatus();
+            if (status === 'online') return '🟢 Online';
+            if (status === 'away') return '🟡 Away';
+            return '⚪ Offline';
+        }
+
+        // Get status class
+        function getStatusClass() {
+            const status = getUserStatus();
+            return status === 'online' ? 'online' : (status === 'away' ? 'away' : 'offline');
+        }
+
+        // Update status indicators
+        function updateStatusIndicators() {
+            const statusIndicator = document.getElementById('profile-status-indicator');
+            const statusText = document.getElementById('profile-modal-status');
+            const lastActiveEl = document.getElementById('profile-modal-last-active');
+            const activeDurationEl = document.getElementById('profile-modal-active-time');
+
+            if (statusIndicator) {
+                statusIndicator.className = `status-indicator ${getStatusClass()}`;
+            }
+            if (statusText) {
+                statusText.textContent = getStatusText();
+            }
+            if (lastActiveEl) {
+                lastActiveEl.textContent = getLastActiveTime();
+            }
+            if (activeDurationEl) {
+                activeDurationEl.textContent = getActiveDuration();
+            }
+        }
+
+        // Update status every 30 seconds
+        setInterval(updateStatusIndicators, 30000);
+
+        function initTelegramApp() {
+            const tg = window.Telegram?.WebApp;
+
+            if (tg) {
+                tg.ready();
+                tg.expand();
+
+                const user = tg.initDataUnsafe?.user;
+
+                if (user && user.id) {
+                    // Compact Profile Card
+                    document.getElementById('profile-tap-name').innerText = `${user.first_name} ${user.last_name || ''}`;
+                    document.getElementById('profile-tap-avatar').src = user.photo_url || "https://cloudflare.com";
+
+                    // Modal Details
+                    document.getElementById('profile-modal-name').innerText = `${user.first_name} ${user.last_name || ''}`;
+                    document.getElementById('profile-modal-username').innerText = user.username ? `@${user.username}` : 'No Username';
+                    document.getElementById('profile-modal-id').innerText = user.id;
+                    document.getElementById('profile-modal-lang').innerText = user.language_code || 'en';
+                    document.getElementById('profile-modal-avatar').src = user.photo_url || "https://cloudflare.com";
+
+                    // Set join date
+                    const today = new Date();
+                    document.getElementById('profile-modal-join-date').innerText = today.toLocaleDateString();
+
+                    // Initialize status indicators
+                    updateStatusIndicators();
+
+                    clearInterval(checkInterval);
+                }
+            }
+        }
+
+        const checkInterval = setInterval(initTelegramApp, 500);
+
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            if (document.getElementById('profile-modal-id').innerText === "Loading...") {
+                // Compact Profile Card
+                document.getElementById('profile-tap-name').innerText = "Web Browser Mode";
+                document.getElementById('profile-tap-avatar').src = "https://cloudflare.com";
+
+                // Modal Details
+                document.getElementById('profile-modal-name').innerText = "Web Browser Mode";
+                document.getElementById('profile-modal-username').innerText = "@not_inside_tg";
+                document.getElementById('profile-modal-id').innerText = "Offline_ID_101";
+                document.getElementById('profile-modal-lang').innerText = "en";
+                document.getElementById('profile-modal-avatar').src = "https://cloudflare.com";
+
+                // Set join date
+                const today = new Date();
+                document.getElementById('profile-modal-join-date').innerText = today.toLocaleDateString();
+
+                // Initialize status indicators
+                updateStatusIndicators();
+            }
+        }, 5000);
+
+        // Profile Modal Functions
+        function openProfileModal() {
+            updateStatusIndicators();
+            document.getElementById('profileModalOverlay').classList.add('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModalOverlay').classList.remove('show');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('profileModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProfileModal();
+            }
+        });
+
+        // Theme Management Fun
+        function openThemeModal() {
+            document.getElementById('themeModalOverlay').style.display = 'flex';
+        }
+
+        function closeThemeModal() {
+            document.getElementById('themeModalOverlay').style.display = 'none';
+        }
+
+        function setTheme(theme, element) {
+            document.body.className = theme;
+            
+            // Update active state
+            document.querySelectorAll('.theme-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            // Save to localStorage
+            localStorage.setItem('selectedTheme', theme);
+        }
+
+        // Load saved theme on page load
+        window.addEventListener('load', function() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'light-theme';
+            document.body.className = savedTheme;
+            
+            const themeElement = document.querySelector(`[data-theme="${savedTheme}"]`);
+            if (themeElement) {
+                document.querySelectorAll('.theme-option').forEach(el => {
+                    el.classList.remove('active');
+                });
+                themeElement.classList.add('active');
+            }
+
+            // Initialize status on load
+            updateStatusIndicators();
+        });
+
+        // Close theme modal on overlay click
+        document.getElementById('themeModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeThemeModal();
+            }
+        });
+    </script>
+        <!-- छह रंग-बिरंगे बटनों का HTML कोड -->
+    <div class="custom-bottom-container">
+        <!--- सपोर्ट केे तीन बटन ---!>
+        <button class="custom-bottom-btn channel-btn" onclick="openMyChannel(event)" ontouchstart="openMyChannel(event)">ᴜᴘᴅᴀᴛᴇ</button>
+        <button class="custom-bottom-btn group-btn" onclick="openMyGroup(event)" ontouchstart="openMyGroup(event)">ꜱᴜᴘᴘᴏʀᴛ</button>
+        <button class="custom-bottom-btn third-btn" onclick="openThirdLink(event)" ontouchstart="openThirdLink(event)">ʜᴇʟᴘ</button>
+    </div>
+
+    <!-- टेलीग्राम का जावास्क्रिप्ट SDK -->
+    <script src="https://telegram.org"></script>
+
+    <script>
+        // टेलीग्राम वेब ऐप को तुरंत इनिशियलाइज करना
+        const tg = window.Telegram.WebApp;
+        
+        // यह टेलीग्राम को बताता है कि ऐप लोड हो चुका है
+        tg.ready();
+        tg.expand();
+
+        // डबल क्लिक या टच लैग को रोकने के लिए हेल्पर फ़ंक्शन
+        function handleNavigation(e, url) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            // टेलीग्राम SDK के ज़रिए लिंक खोलना
+            if (tg && typeof tg.openTelegramLink === 'function') {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        // 1. चैनल का लिंक
+        function openMyChannel(e) {
+            handleNavigation(e, "https://t.me/Sangeet_Stream"); 
+        }
+
+        // 2. ग्रुप का लिंक
+        function openMyGroup(e) {
+            handleNavigation(e, "https://t.me/sapna_quiz"); 
+        }
+
+        // 3. तीसरे हेल्प बटन का लिंक
+        function openThirdLink(e) {
+            handleNavigation(e, "https://t.me/Comeback_009"); 
+        }
+    </script>
+</body>
+</html>
